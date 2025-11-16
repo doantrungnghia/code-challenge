@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sum to N - Quick Test</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+    code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; }
+    .result { margin-top: 8px; font-weight: 600; }
+    .section { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 12px 0; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    label { min-width: 110px; font-weight: 600; }
+    input[type="number"] { width: 120px; padding: 6px 8px; }
+    button { padding: 6px 10px; cursor: pointer; }
+    h2 { margin: 0 0 12px 0; font-size: 1.1rem; }
+    .note { color: #6b7280; font-size: 0.9rem; margin-top: 6px; }
+    .bar { height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+    .bar > span { display: block; height: 100%; width: 0%; background: #3b82f6; transition: width .1s linear; }
+    .pct { font-size: 0.85rem; color: #374151; margin-top: 4px; }
+  </style>
+  <script src="./script.js"></script>
+  <script>
+    function handleCalc(fn, inputId, outputId) {
+      const raw = document.getElementById(inputId).value;
+      const n = parseInt(raw || '0', 10);
+      // Clear previous result while computing
+      document.getElementById(outputId).textContent = 'Calculating...';
+      const res = fn(n);
+      document.getElementById(outputId).textContent = `Result: ${res}`;
+      console.log(`${fn.name}(${n}) = ${res}`);
+    }
+    function setProgress(progressId, pct) {
+      const bar = document.querySelector(`#${progressId} .bar > span`);
+      const txt = document.querySelector(`#${progressId} .pct`);
+      if (bar) bar.style.width = `${pct}%`;
+      if (txt) txt.textContent = `${pct}%`;
+    }
+    function disableControls(sectionId, disable) {
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      const btn = section.querySelector('button');
+      const input = section.querySelector('input');
+      if (btn) btn.disabled = disable;
+      if (input) input.disabled = disable;
+    }
+    function handleCalcWithProgressLoop(sectionId, inputId, outputId) {
+      const raw = document.getElementById(inputId).value;
+      const out = document.getElementById(outputId);
+      const n = parseInt(raw || '0', 10);
+      let sum = 0;
+      let i = 1;
+      const total = Math.max(n, 1);
+      disableControls(sectionId, true);
+      setProgress(`${sectionId}-progress`, 0);
+      // Clear previous result while computing
+      out.textContent = 'Calculating...';
+      function chunk() {
+        const start = performance.now();
+        // Process ~8ms of work per chunk to keep UI responsive
+        while (i <= n && performance.now() - start < 8) {
+          sum += i;
+          i++;
+        }
+        const pct = Math.min(100, Math.floor((i - 1) / total * 100));
+        setProgress(`${sectionId}-progress`, pct);
+        if (i <= n) {
+          setTimeout(chunk, 0);
+        } else {
+          out.textContent = `Result: ${sum}`;
+          disableControls(sectionId, false);
+        }
+      }
+      chunk();
+    }
+    function handleCalcWithProgressRecursive(sectionId, inputId, outputId) {
+      // We simulate recursion iteratively to show progress without blowing the stack.
+      return handleCalcWithProgressLoop(sectionId, inputId, outputId);
+    }
+  </script>
+</head>
+<body>
+  <h1>Sum to N — Test Inputs</h1>
+
+  <div class="section" id="section-a">
+    <h2>A) Plain loop</h2>
+    <div class="row">
+      <label for="input-a">Input n:</label>
+      <input id="input-a" type="number" value="5" min="0" step="1" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+      <button onclick="handleCalcWithProgressLoop('section-a', 'input-a', 'out-a')">Calculate</button>
+    </div>
+    <div class="result" id="out-a">Result: —</div>
+    <div id="section-a-progress">
+      <div class="bar"><span></span></div>
+      <div class="pct">0%</div>
+    </div>
+    <div class="note">Iterates 1..n and accumulates the sum.</div>
+  </div>
+
+  <div class="section" id="section-c">
+    <h2>B) Recursive</h2>
+    <div class="row">
+      <label for="input-c">Input n:</label>
+      <input id="input-c" type="number" value="5" min="0" step="1" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+      <button onclick="handleCalcWithProgressRecursive('section-c', 'input-c', 'out-c')">Calculate</button>
+    </div>
+    <div class="result" id="out-c">Result: —</div>
+    <div id="section-c-progress">
+      <div class="bar"><span></span></div>
+      <div class="pct">0%</div>
+    </div>
+    <div class="note">Computes n + sum_to_n_c(n-1) with a base case.</div>
+  </div>
+
+  <div class="section" id="section-b">
+    <h2>C) Gauss Summation</h2>
+    <div class="row">
+      <label for="input-b">Input n:</label>
+      <input id="input-b" type="number" value="5" min="0" step="1" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+      <button onclick="handleCalc(sum_to_n_b, 'input-b', 'out-b')">Calculate</button>
+    </div>
+    <div class="result" id="out-b">Result: —</div>
+    <div class="note">Uses the formula n * (n + 1) / 2.</div>
+  </div>
+</body>
+</html>
+
