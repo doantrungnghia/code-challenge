@@ -6,7 +6,7 @@ const mockBalances = [
   { currency: 'NEO', amount: 13.9, blockchain: 'Neo' },
 ];
 
-const mockPrices = {
+const mockPrices: Record<string, number> = {
   OSMO: 0.9,
   ETH: 3400,
   ARB: 1.1,
@@ -15,5 +15,4 @@ const mockPrices = {
 };
 
 export const useWalletBalances = () => mockBalances;
-export const usePrices = () => mockPrices;
-
+export const usePrices = (): Record<string, number> => mockPrices;

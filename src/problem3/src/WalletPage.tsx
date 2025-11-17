@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type HTMLAttributes } from 'react';
 import { useWalletBalances, usePrices } from './mocks/wallet';
 import { WalletRow } from './WalletRow';
 
@@ -7,67 +7,55 @@ interface WalletBalance {
   currency: string;
   amount: number;
 }
-interface FormattedWalletBalance {
-  currency: string;
-  amount: number;
-  formatted: string;
-}
+type BoxProps = HTMLAttributes<HTMLDivElement>;
+type Props = BoxProps;
 
-interface Props extends BoxProps { }
+const getPriority = (blockchain: string): number => {
+  switch (blockchain) {
+    case 'Osmosis':
+      return 100;
+    case 'Ethereum':
+      return 50;
+    case 'Arbitrum':
+      return 30;
+    case 'Zilliqa':
+      return 20;
+    case 'Neo':
+      return 20;
+    default:
+      return -99;
+  }
+};
 
 const WalletPage: React.FC<Props> = (props: Props) => {
-  const { children, ...rest } = props;
+  const { ...rest } = props;
   const balances = useWalletBalances();
   const prices = usePrices();
 
-  const getPriority = (blockchain: any): number => {
-    switch (blockchain) {
-      case 'Osmosis':
-        return 100
-      case 'Ethereum':
-        return 50
-      case 'Arbitrum':
-        return 30
-      case 'Zilliqa':
-        return 20
-      case 'Neo':
-        return 20
-      default:
-        return -99
-    }
-  }
-
   const sortedBalances = useMemo(() => {
-    return balances.filter((balance: WalletBalance) => {
-      const balancePriority = getPriority(balance.blockchain);
-      if (balancePriority > -99) {
-        if (balance.amount > 0) {
-          return true;
-        }
-      }
-      return false
-    }).sort((lhs: WalletBalance, rhs: WalletBalance) => {
-      const leftPriority = getPriority(lhs.blockchain);
-      const rightPriority = getPriority(rhs.blockchain);
-      if (leftPriority > rightPriority) {
-        return -1;
-      } else if (rightPriority > leftPriority) {
-        return 1;
-      }
-    });
-  }, [balances, prices]);
+    return balances
+      .map((balance: WalletBalance) => ({
+        ...balance,
+        priority: getPriority(balance.blockchain),
+      }))
+      .filter(({ priority, amount }) => priority > -99 && amount > 0)
+      .sort((lhs, rhs) => rhs.priority - lhs.priority);
+  }, [balances]);
 
-  const rows = sortedBalances.map((balance: FormattedWalletBalance, index: number) => {
-    const usdValue = prices[balance.currency] * balance.amount;
-    return (
-      <WalletRow
-        key={index}
-        amount={balance.amount}
-        usdValue={usdValue}
-        formattedAmount={balance.formatted}
-      />
-    )
-  })
+  const rows = useMemo(() => {
+    return sortedBalances.map((balance) => {
+      const usdValue = prices[balance.currency] * balance.amount;
+      const formattedAmount = balance.amount.toFixed();
+      return (
+        <WalletRow
+          key={`${balance.blockchain}-${balance.currency}`}
+          amount={balance.amount}
+          usdValue={usdValue}
+          formattedAmount={formattedAmount}
+        />
+      );
+    });
+  }, [sortedBalances, prices]);
 
   return (
     <div {...rest}>
