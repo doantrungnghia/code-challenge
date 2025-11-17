@@ -1,4 +1,9 @@
+import { useMemo } from 'react';
+import { useWalletBalances, usePrices } from './mocks/wallet';
+import { WalletRow } from './WalletRow';
+
 interface WalletBalance {
+  blockchain: string;
   currency: string;
   amount: number;
 }
@@ -35,8 +40,8 @@ const WalletPage: React.FC<Props> = (props: Props) => {
   const sortedBalances = useMemo(() => {
     return balances.filter((balance: WalletBalance) => {
       const balancePriority = getPriority(balance.blockchain);
-      if (lhsPriority > -99) {
-        if (balance.amount <= 0) {
+      if (balancePriority > -99) {
+        if (balance.amount > 0) {
           return true;
         }
       }
@@ -52,18 +57,10 @@ const WalletPage: React.FC<Props> = (props: Props) => {
     });
   }, [balances, prices]);
 
-  const formattedBalances = sortedBalances.map((balance: WalletBalance) => {
-    return {
-      ...balance,
-      formatted: balance.amount.toFixed()
-    }
-  })
-
   const rows = sortedBalances.map((balance: FormattedWalletBalance, index: number) => {
     const usdValue = prices[balance.currency] * balance.amount;
     return (
       <WalletRow
-        className={classes.row}
         key={index}
         amount={balance.amount}
         usdValue={usdValue}
