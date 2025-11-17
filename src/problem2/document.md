@@ -3,7 +3,7 @@
 ## Run the project
 
 ```bash
-cd /Users/nghiadoan/Desktop/personal/code-challenge/src/problem2/fancy-form
+cd /Users/nghiadoan/Desktop/personal/code-challenge/src/problem2
 npm install        # or pnpm install / yarn install
 npm run dev        # launches Vite dev server (default http://localhost:5173)
 ```
