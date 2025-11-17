@@ -1,3 +1,10 @@
+# Problem 1
+
+## Run the project
+
+- Open `src/problem1/index.html` in a browser.
+- Enter a value for each approach and click "Calculate" to see results.
+
 ## Sum to n — three simple approaches
 
 Input: `n` (integer). Output: `1 + 2 + ... + n`. For `n <= 0`, return `0`. We assume the result stays below `Number.MAX_SAFE_INTEGER`.
@@ -20,7 +27,3 @@ Input: `n` (integer). Output: `1 + 2 + ... + n`. For `n <= 0`, return `0`. We as
 
 ### Notes
 - Prefer the Gauss Summation (Approach C). It’s fastest but need formulation
-
-### How to run / test (Browser)
-- Open `src/problem1/index.html` in a browser.
-- Enter a value for each approach and click "Calculate" to see results.

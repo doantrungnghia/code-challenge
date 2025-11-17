@@ -1,3 +1,5 @@
+# Problem 3
+
 ## How to Run
 
 1. `cd /Users/nghiadoan/Desktop/personal/code-challenge/src/problem3`
