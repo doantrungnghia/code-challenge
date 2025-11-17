@@ -1,6 +1,8 @@
-function App() {
+import WalletPage from './WalletPage'
+
+const App = () => {
   return (
-    <div></div>
+    <WalletPage />
   )
 }
 
